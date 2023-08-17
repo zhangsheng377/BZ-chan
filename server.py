@@ -35,8 +35,8 @@ def handle(send_key):
     msg = data.get('msg', '')
 
     channel_name = bz_chan['channel']
-    channel = ChannelFactory.get(channel_name=channel_name, msg_type='markdown')
-    post_args = channel.get_post_args(send_key=send_key, msg=msg)
+    channel = ChannelFactory.get(channel_name=channel_name)
+    post_args = channel.get_post_args(send_key=send_key, msg_type='markdown', msg=msg)
     r = requests.post(**post_args)
     return r.text
 

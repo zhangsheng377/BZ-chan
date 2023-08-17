@@ -9,7 +9,7 @@ class ChannelFactory:
     @staticmethod
     def register_channel(channel_name: str, channel_class):
         ChannelFactory._channel_map[channel_name] = channel_class
-        print(f"ChannelFactory : register_channel : channel_name:{channel_name} channel_class:{channel_class}")
+        logging.info(f"ChannelFactory : register_channel : channel_name:{channel_name} channel_class:{channel_class}")
 
     @staticmethod
     def get(channel_name: str, **kwargs) -> Channel:

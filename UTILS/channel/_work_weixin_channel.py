@@ -10,28 +10,31 @@ class MsgType(Enum):
 
 
 class WorkWeixinChannel(Channel):
-    def __init__(self, msg_type, header=None, proxies=None):
-        super(WorkWeixinChannel, self).__init__(msg_type=msg_type)
-        self.msg_type = MsgType(msg_type)
+    def __init__(self, header=None, proxies=None):
+        super(WorkWeixinChannel, self).__init__()
         self.header = header if header is not None else {"Content-Type": "application/json"}
         self.proxies = proxies if proxies is not None else {}
 
     def _get_webhook(self, send_key: str):
         return f"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key={send_key}"
 
-    def get_post_args(self, send_key: str, msg: str):
-        if self.msg_type == MsgType.MARKDOWN:
-            message = {
-                "msgtype": "markdown",
-                "markdown": {
-                    "content": msg
-                }
-            }
-            message_json = json.dumps(message)
-            webhook = self._get_webhook(send_key=send_key)
-            return {'url': webhook, 'data': message_json, 'headers': self.header, 'proxies': self.proxies}
+    def get_post_args(self, send_key: str, msg_type: str, **kwargs):
+        msg_type = MsgType(msg_type)
+        if msg_type == MsgType.MARKDOWN:
+            return self._get_markdown_post_args(send_key, **kwargs)
         else:
             raise NotImplementedError
+
+    def _get_markdown_post_args(self, send_key: str, msg: str):
+        message = {
+            "msgtype": "markdown",
+            "markdown": {
+                "content": msg
+            }
+        }
+        message_json = json.dumps(message)
+        webhook = self._get_webhook(send_key=send_key)
+        return {'url': webhook, 'data': message_json, 'headers': self.header, 'proxies': self.proxies}
 
 
 ChannelFactory.register_channel(channel_name='企业微信', channel_class=WorkWeixinChannel)
