@@ -1,3 +1,4 @@
+import logging
 import os
 
 import requests
@@ -32,15 +33,20 @@ def handle(send_key):
     if not bz_chan or 'channel' not in bz_chan:
         return f'send_key:{send_key} error.', 404
     data = request_parse(request)
-    msg = data.get('msg', '')
+    if hasattr(data, 'to_dict'):
+        data = data.to_dict()
+    app.logger.info(data)
+
+    msg_type = data.pop('msg_type', 'markdown')
 
     channel_name = bz_chan['channel']
     channel = ChannelFactory.get(channel_name=channel_name)
-    post_args = channel.get_post_args(send_key=send_key, msg_type='markdown', msg=msg)
+    post_args = channel.get_post_args(send_key=send_key, msg_type=msg_type, **data)
     r = requests.post(**post_args)
     return r.text
 
 
 if __name__ == '__main__':
+    app.logger.setLevel(logging.INFO)
     http_server = WSGIServer(('0.0.0.0', PORT), app)
     http_server.serve_forever()
