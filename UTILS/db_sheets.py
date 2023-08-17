@@ -1,7 +1,7 @@
 import os
 
 from UTILS.cache_redis import CacheRedis
-from UTILS.database_factory import DatabaseFactory
+from UTILS.database_factory._factory import DataBaseFactory
 
 MONGODB_HOST = os.getenv('MONGODB_HOST')
 MONGODB_PORT = int(os.getenv('MONGODB_PORT'))
@@ -10,8 +10,9 @@ REDIS_PORT = int(os.getenv('REDIS_PORT'))
 
 
 def get_db_sheet(database_name, sheet_name):
-    database_factory = DatabaseFactory(host=MONGODB_HOST, port=MONGODB_PORT, model='pymongo')
-    return database_factory.get(database_name=database_name, sheet_name=sheet_name)
+    database = DataBaseFactory.get(database_type='pymongo', database_name=database_name, sheet_name=sheet_name,
+                                   host=MONGODB_HOST, port=MONGODB_PORT)
+    return database
 
 
 cache_redis = CacheRedis(host=REDIS_HOST, port=REDIS_PORT, db=0)

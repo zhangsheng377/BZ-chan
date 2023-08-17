@@ -37,4 +37,4 @@ class WorkWeixinChannel(Channel):
         return {'url': webhook, 'data': message_json, 'headers': self.header, 'proxies': self.proxies}
 
 
-ChannelFactory.register_channel(channel_name='企业微信', channel_class=WorkWeixinChannel)
+ChannelFactory.register(channel_name='企业微信', channel_class=WorkWeixinChannel)
