@@ -1,0 +1,22 @@
+version: "2.4"
+services:
+  server:
+    image: zhangsheng377/bz_chan_image:latest
+    container_name: bz_chan_server
+    restart: always
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "22226:22226"
+    environment:
+      MONGODB_HOST: '192.168.10.5'
+      MONGODB_PORT: 27017
+      REDIS_HOST: '192.168.10.5'
+      REDIS_PORT: 6379
+    logging:
+      options:
+        max-size: "10m"
+    entrypoint:
+      - /bin/bash
+      - docker_cmd_server.sh
