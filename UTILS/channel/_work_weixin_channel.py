@@ -16,6 +16,7 @@ class MsgType(Enum):
     TEXT = 'text'
     NEWS = 'news'
     FILE = 'file'
+    TEMPLATE_CARD_NEWS_NOTICE = 'template_card_news_notice'
 
 
 def _get_markdown_message(content: str, *args, **kwargs):
@@ -55,6 +56,57 @@ def _get_news_message(articles: list, *args, **kwargs):
     }
 
 
+def _get_file_message(send_key: str, file_path: str = 'README.md', proxies=None, *args, **kwargs):
+    if proxies is None:
+        proxies = {}
+    up_file_url = f"https://qyapi.weixin.qq.com/cgi-bin/webhook/upload_media?key={send_key}&type=file"
+    file_data = open(file_path, "rb")
+    file = {os.path.basename(file_path): file_data}
+    res = requests.post(up_file_url, files=file, proxies=proxies)  # 需要先将文件上传到腾讯的临时文件服务器
+    media_id = res.json()['media_id']
+    return {
+        "msgtype": "file",
+        "file": {
+            "media_id": media_id
+        }
+    }
+
+
+def _get_template_card_news_notice_message(rss_feed_title: str, url: str, title: str, last_title: str, image_url: str,
+                                           *args, **kwargs):
+    return {
+        "msgtype": "template_card",
+        "template_card": {
+            "card_type": "news_notice",
+            "source": {
+                "desc": f"{rss_feed_title}",
+            },
+            "main_title": {
+                "title": f"{title}",
+            },
+            "card_image": {
+                "url": f"{image_url}",
+            },
+            "quote_area": {
+                "type": 1,
+                "url": f"{url}",
+                "quote_text": f"<-- {last_title}"
+            },
+            "jump_list": [
+                {
+                    "type": 1,
+                    "url": f"{url}",
+                    "title": "详情链接"
+                },
+            ],
+            "card_action": {
+                "type": 1,
+                "url": f"{url}",
+            }
+        }
+    }
+
+
 class WorkWeixinChannel(Channel):
     def __init__(self, header=None, proxies=None):
         super(WorkWeixinChannel, self).__init__()
@@ -73,25 +125,15 @@ class WorkWeixinChannel(Channel):
         elif msg_type == MsgType.NEWS:
             message = _get_news_message(*args, **kwargs)
         elif msg_type == MsgType.FILE:
-            message = self._get_file_message(send_key=send_key, *args, **kwargs)
+            message = _get_file_message(send_key=send_key, proxies=self.proxies, *args, **kwargs)
+        elif msg_type == MsgType.TEMPLATE_CARD_NEWS_NOTICE:
+            message = _get_template_card_news_notice_message(*args, **kwargs)
         else:
             raise NotImplementedError
+
         message_json = json.dumps(message)
         webhook = self._get_webhook(send_key=send_key)
         return {'url': webhook, 'data': message_json, 'headers': self.header, 'proxies': self.proxies}
-
-    def _get_file_message(self, send_key: str, file_path: str = 'README.md', *args, **kwargs):
-        up_file_url = f"https://qyapi.weixin.qq.com/cgi-bin/webhook/upload_media?key={send_key}&type=file"
-        file_data = open(file_path, "rb")
-        file = {os.path.basename(file_path): file_data}
-        res = requests.post(up_file_url, files=file, proxies=self.proxies)  # 需要先将文件上传到腾讯的临时文件服务器
-        media_id = res.json()['media_id']
-        return {
-            "msgtype": "file",
-            "file": {
-                "media_id": media_id
-            }
-        }
 
 
 ChannelFactory.register(channel_name='企业微信', channel_class=WorkWeixinChannel)
