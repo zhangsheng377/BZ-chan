@@ -37,7 +37,9 @@ def handle(send_key):
         data = data.to_dict()
     app.logger.info(data)
 
-    msg_type = data.pop('msg_type', 'markdown')
+    if 'msgtype' not in data:
+        app.logger.info(f"'msgtype' not in data!")
+    msg_type = data.pop('msgtype', 'markdown')
 
     channel_name = bz_chan['channel']
     channel = ChannelFactory.get(channel_name=channel_name)
