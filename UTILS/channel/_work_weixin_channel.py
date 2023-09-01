@@ -42,12 +42,6 @@ def _get_text_message(content: str, mentioned_list: list = None, mentioned_mobil
 
 
 def _get_news_message(articles: list, *args, **kwargs):
-    str1 = articles[0]['picurl']
-    pattern = re.compile("""<img[^>]+src=["']([^'"<>]+)["'][^<>]+/?>""")  # 要有空格隔开 才会有输出结果
-    str2 = pattern.findall(str1)
-    print(str2)
-    if len(str2) > 0:
-        articles[0]['picurl'] = str2[0]
     return {
         "msgtype": "news",
         "news": {
