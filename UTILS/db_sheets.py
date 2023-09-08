@@ -24,7 +24,7 @@ def get_db_bz_chans():
 
 
 def get_bz_chans():
-    return cache_redis.get_cache_from_db('bz_chans', get_db_bz_chans)
+    return cache_redis.get_cache_from_db('bz_chans', get_db_bz_chans, ex=60*60*24)
 
 
 def get_bz_chan(send_key):
