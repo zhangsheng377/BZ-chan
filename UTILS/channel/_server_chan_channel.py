@@ -19,8 +19,10 @@ def _get_markdown_message(title: str, desp: str, *args, **kwargs):
 
 
 class ServerChanChannel(Channel):
-    def __init__(self):
+    def __init__(self, header=None, proxies=None):
         super(ServerChanChannel, self).__init__()
+        self.header = header if header is not None else {"Content-Type": "application/json"}
+        self.proxies = proxies if proxies is not None else {}
 
     def _get_webhook(self, send_key: str):
         return f"https://sctapi.ftqq.com/{send_key}.send"
@@ -34,7 +36,7 @@ class ServerChanChannel(Channel):
 
         message_json = json.dumps(message)
         webhook = self._get_webhook(send_key=send_key)
-        return {'url': webhook, 'data': message_json}
+        return {'url': webhook, 'data': message_json, 'headers': self.header, 'proxies': self.proxies}
 
 
 ChannelFactory.register(channel_name='Server酱', channel_class=ServerChanChannel)
