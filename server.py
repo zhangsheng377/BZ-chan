@@ -41,6 +41,9 @@ def handle(send_key):
         app.logger.info(f"'msgtype' not in data!")
     msg_type = data.pop('msgtype', 'markdown')
 
+    if 'content' not in data:
+        data['content'] = str(data)
+
     channel_name = bz_chan['channel']
     channel = ChannelFactory.get(channel_name=channel_name)
     post_args = channel.get_post_args(send_key=send_key, msg_type=msg_type, **data)
